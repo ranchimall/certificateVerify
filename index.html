@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>Ranchimall Certificate Verifier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <script id="floGlobals">
     /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
     const floGlobals = {
@@ -24,12 +26,119 @@
         //fee: 0.0005,
     }
 </script>
-
+<style>
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+}
+:root{
+    font-size: clamp(16px, 1.2vmax, 40px);
+}
+body{
+    display: grid;
+    gap: 2em 0; 
+    grid-template-columns: 2rem 1fr 2rem;
+    padding-bottom: 4rem;
+}
+body > * {
+    grid-column: 2;
+}
+h2{
+    text-transform: capitalize;
+}
+h4{
+    font-weight: 500;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    background: rgba(0,0,0,0.06);
+    border-radius: 2rem;
+    padding: 0.6rem 1.6rem;
+    width: auto;
+    align-self: center;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+p{
+    font-size: 1.1rem;
+    line-height: 1.7;
+    max-width: 70ch;
+    opacity: 0.8;
+}
+.hide-completely{
+    display: none !important;
+}
+.icon {
+    height: 4rem;
+    width: 4rem;
+    fill: none;
+    stroke-width: 4;
+    overflow: visible;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-bottom: 1rem;
+    align-self: center;
+}
+header{
+    border-bottom: solid 0.1rem rgba(0,0,0,0.2);
+    grid-column: 1/4;
+    padding: 1.5rem 2rem;
+}
+header h3{
+    font-weight: 500;
+}
+#result_box{
+    display: grid;
+    gap: 1em;
+}
+#verified{
+    display: flex;
+    flex-direction: column;
+}
+#verified .icon{
+    stroke: rgb(18, 192, 70);
+}
+#unverified .icon{
+    stroke: rgb(255, 48, 48);
+}
+@media screen and (min-width: 640px){
+    body{
+        grid-template-columns: 1fr 60vw 1fr;
+    }
+    header{
+        padding: 1.5rem 3rem;
+    }
+}
+</style>
 </head>
 
 <body onload="onLoadStartUp()">
-    <h1>Ranchimall Certificate Verifier</h1>
-    <div id="resultBox"></div>
+    <header>
+        <h3>Ranchimall Certificate Verifier</h3>
+    </header>
+    <div id="verified" class="hide-completely">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 64 64">
+            <title>success</title>
+            <ellipse cx="32" cy="32" rx="31.5" ry="31.49"/>
+            <polyline points="17.04 30.48 27.92 41.36 46.96 22.32"/>
+        </svg>
+        <h4>
+            Verified, This is a genuine certificate issued by RanchiMall.
+        </h4>
+    </div>
+    <div id="unverified" class="hide-completely">
+        <svg viewBox="0 0 64 64" class="icon">
+        <title>error</title>
+            <path d="M32,4.73a3.17,3.17,0,0,1,2.76,1.59l13.9,24.09L62.57,54.49a3.19,3.19,0,0,1-2.76,4.78H4.19a3.19,3.19,0,0,1-2.76-4.78L15.34,30.41,29.24,6.32A3.17,3.17,0,0,1,32,4.73m0-1a4.14,4.14,0,0,0-3.62,2.09L14.47,29.91.57,54a4.19,4.19,0,0,0,3.62,6.28H59.81A4.19,4.19,0,0,0,63.43,54L49.53,29.91,35.62,5.82A4.14,4.14,0,0,0,32,3.73Z"/>
+            <line x1="32" y1="24" x2="32" y2="36"/>
+            <line x1="32" y1="46" x2="32" y2="48"/>
+        </svg>
+        <h4>
+            Verification failed!
+        </h4>
+    </div>
+    <div id="result_box"></div>
 
 <script id="init_lib" version="1.0.1">
     //All util libraries required for Standard operations (DO NOT EDIT ANY)
@@ -7684,6 +7793,9 @@ Bitcoin.Util = {
         }
     }
 
+    const   verified = document.getElementById('verified'),
+            unverified = document.getElementById('unverified')
+
     function internVerification(id) {
         floBlockchainAPI.getTx(id).then(tx => {
             let iVerify = false,
@@ -7699,24 +7811,25 @@ Bitcoin.Util = {
                     break;
                 }
             if (iVerify && oVerify) {
-                alert("Internship Certificate Verified")
+                console.log("Internship Certificate Verified")
                 let link = getBlockchainLink(`tx/${id}`)
-                outputUI("Internship certificate", tx.floData, `verified (${Date(tx.time)})`, link)
+                outputUI("Internship certificate", tx.floData, `Verified (${Date(tx.time)})`, link)
+                verified.classList.remove('hide-completely')
+                unverified.classList.add('hide-completely')
             } else {
-                alert("Verification failed")
-                outputUI("Internship certificate", id, `not verified`)
+                console.log("Verification failed")
+                verified.classList.add('hide-completely')
+                unverified.classList.remove('hide-completely')
+                outputUI("Internship certificate", id, `Not verified`)
             }
         }).catch(error => console.error(error))
     }
 
     function outputUI(type, data, status, link) {
-        let container = document.createElement('div')
-        let t = document.createElement('h3')
+        let t = document.createElement('h2')
         t.textContent = type
-        container.appendChild(t)
-        let d = document.createElement('h4')
+        let d = document.createElement('p')
         d.textContent = data
-        container.appendChild(d)
         let s = document.createElement('a')
         s.textContent = status
         if (link) {
@@ -7724,8 +7837,7 @@ Bitcoin.Util = {
             s.setAttribute('target', '_blank')
             s.setAttribute('title', 'View in blockchain')
         }
-        container.appendChild(s)
-        document.getElementById("resultBox").appendChild(container)
+        document.getElementById("result_box").append(t, d, s)
     }
 
     function getBlockchainLink(path) {
