@@ -7813,7 +7813,7 @@ Bitcoin.Util = {
             if (iVerify && oVerify) {
                 console.log("Internship Certificate Verified")
                 let link = getBlockchainLink(`tx/${id}`)
-                outputUI("RIBC certificate", tx.floData, `Verified (${Date(tx.time)})`, link)
+                outputUI("RIBC certificate", tx.floData, `Verified (${new Date(tx.time*1000)})`, link)
                 verified.classList.remove('hide-completely')
                 unverified.classList.add('hide-completely')
             } else {
