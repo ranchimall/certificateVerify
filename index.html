@@ -28,7 +28,9 @@
 </head>
 
 <body onload="onLoadStartUp()">
-    Ranchimall Certificate Verifier
+    <h1>Ranchimall Certificate Verifier</h1>
+    <div id="resultBox"></div>
+
 <script id="init_lib" version="1.0.1">
     //All util libraries required for Standard operations (DO NOT EDIT ANY)
 
@@ -7220,7 +7222,7 @@ Bitcoin.Util = {
         }
     }
 </script>
-<script id="floBlockchainAPI" version="2.0.0">
+<script id="floBlockchainAPI" version="2.0.1">
     /* FLO Blockchain Operator to send/receive data from blockchain using API calls*/
     const floBlockchainAPI = {
 
@@ -7581,6 +7583,14 @@ Bitcoin.Util = {
             })
         },
 
+        getTx: function (txid) {
+            return new Promise((resolve, reject) => {
+                this.promisedAPI(`api/tx/${txid}`)
+                    .then(response => resolve(response))
+                    .catch(error => reject(error))
+            })
+        },
+
         //Read Txs of Address between from and to
         readTxs: function (addr, from, to) {
             return new Promise((resolve, reject) => {
@@ -7659,6 +7669,68 @@ Bitcoin.Util = {
 <script id="onLoadStartUp">
     function onLoadStartUp() {
         console.log("Ranchimall Certificate Verifier")
+        let ver_reqs = window.location.search.substring(1).split('&')
+        for (let v in ver_reqs) {
+            let req = ver_reqs[v].split('=')
+            let key = req[0],
+                value = req[1]
+            console.log(key, value)
+            switch (key) {
+                case "internCertificate":
+                    internVerification(value);
+                    break;
+            }
+
+        }
+    }
+
+    function internVerification(id) {
+        floBlockchainAPI.getTx(id).then(tx => {
+            let iVerify = false,
+                oVerify = false;
+            for (let i of tx.vin)
+                if (floGlobals.RMcertificateProvider === i.addr) {
+                    iVerify = true;
+                    break;
+                }
+            for (let o of tx.vout)
+                if (floGlobals.RMincorporationID === o.scriptPubKey.addresses[0]) {
+                    oVerify = true;
+                    break;
+                }
+            if (iVerify && oVerify) {
+                alert("Internship Certificate Verified")
+                let link = getBlockchainLink(`tx/${id}`)
+                outputUI("Internship certificate", tx.floData, `verified (${Date(tx.time)})`, link)
+            } else {
+                alert("Verification failed")
+                outputUI("Internship certificate", id, `not verified`)
+            }
+        }).catch(error => console.error(error))
+    }
+
+    function outputUI(type, data, status, link) {
+        let container = document.createElement('div')
+        let t = document.createElement('h3')
+        t.textContent = type
+        container.appendChild(t)
+        let d = document.createElement('h4')
+        d.textContent = data
+        container.appendChild(d)
+        let s = document.createElement('a')
+        s.textContent = status
+        if (link) {
+            s.setAttribute('href', link)
+            s.setAttribute('target', '_blank')
+            s.setAttribute('title', 'View in blockchain')
+        }
+        container.appendChild(s)
+        document.getElementById("resultBox").appendChild(container)
+    }
+
+    function getBlockchainLink(path) {
+        let flosight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
+        return flosight + path
     }
 </script>
 </body>
