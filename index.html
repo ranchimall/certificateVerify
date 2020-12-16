@@ -102,6 +102,9 @@ header h3{
 #unverified .icon{
     stroke: rgb(255, 48, 48);
 }
+#try-again .icon{
+    stroke: rgb(255, 115, 0);
+}
 @media screen and (min-width: 640px){
     body{
         grid-template-columns: 1fr 60vw 1fr;
@@ -129,13 +132,24 @@ header h3{
     </div>
     <div id="unverified" class="hide-completely">
         <svg viewBox="0 0 64 64" class="icon">
-        <title>error</title>
+        <title>failed</title>
             <path d="M32,4.73a3.17,3.17,0,0,1,2.76,1.59l13.9,24.09L62.57,54.49a3.19,3.19,0,0,1-2.76,4.78H4.19a3.19,3.19,0,0,1-2.76-4.78L15.34,30.41,29.24,6.32A3.17,3.17,0,0,1,32,4.73m0-1a4.14,4.14,0,0,0-3.62,2.09L14.47,29.91.57,54a4.19,4.19,0,0,0,3.62,6.28H59.81A4.19,4.19,0,0,0,63.43,54L49.53,29.91,35.62,5.82A4.14,4.14,0,0,0,32,3.73Z"/>
             <line x1="32" y1="24" x2="32" y2="36"/>
             <line x1="32" y1="46" x2="32" y2="48"/>
         </svg>
         <h4>
             Verification failed!
+        </h4>
+    </div>
+    <div id="try-again" class="hide-completely">
+        <svg viewBox="0 0 64 64" class="icon">
+        <title>error</title>
+            <path d="M32,4.73a3.17,3.17,0,0,1,2.76,1.59l13.9,24.09L62.57,54.49a3.19,3.19,0,0,1-2.76,4.78H4.19a3.19,3.19,0,0,1-2.76-4.78L15.34,30.41,29.24,6.32A3.17,3.17,0,0,1,32,4.73m0-1a4.14,4.14,0,0,0-3.62,2.09L14.47,29.91.57,54a4.19,4.19,0,0,0,3.62,6.28H59.81A4.19,4.19,0,0,0,63.43,54L49.53,29.91,35.62,5.82A4.14,4.14,0,0,0,32,3.73Z"/>
+            <line x1="32" y1="24" x2="32" y2="36"/>
+            <line x1="32" y1="46" x2="32" y2="48"/>
+        </svg>
+        <h4>
+            Try Again Later!
         </h4>
     </div>
     <div id="result_box"></div>
@@ -7778,9 +7792,8 @@ Bitcoin.Util = {
 <script id="onLoadStartUp">
     function onLoadStartUp() {
         console.log("Ranchimall Certificate Verifier")
-        let ver_reqs = window.location.search.substring(1).split('&')
-        for (let v in ver_reqs) {
-            let req = ver_reqs[v].split('=')
+        floBlockchainAPI.getBalance(floCrypto.generateNewID().floID).then(r => {
+            let req = window.location.search.substring(1).split('=')
             let key = req[0],
                 value = req[1]
             console.log(key, value)
@@ -7789,12 +7802,17 @@ Bitcoin.Util = {
                     internVerification(value);
                     break;
             }
-
-        }
+        }).catch(e => {
+            console.error(e)
+            verified.classList.add('hide-completely')
+            unverified.classList.add('hide-completely')
+            tryagain.classList.remove('hide-completely')
+        })
     }
 
-    const   verified = document.getElementById('verified'),
-            unverified = document.getElementById('unverified')
+    const verified = document.getElementById('verified'),
+        unverified = document.getElementById('unverified'),
+        tryagain = document.getElementById('try-again')
 
     function internVerification(id) {
         floBlockchainAPI.getTx(id).then(tx => {
@@ -7813,36 +7831,47 @@ Bitcoin.Util = {
             if (iVerify && oVerify) {
                 console.log("Internship Certificate Verified")
                 let link = getBlockchainLink(`tx/${id}`)
-                outputUI("RIBC certificate", tx.floData, `Verified (${new Date(tx.time*1000)})`, link)
+                outputUI("RIBC certificate", tx.floData, `Issue Date: ${trimDate(tx.time*1000)}`, link)
                 verified.classList.remove('hide-completely')
                 unverified.classList.add('hide-completely')
+                tryagain.classList.add('hide-completely')
             } else {
                 console.log("Verification failed")
                 verified.classList.add('hide-completely')
                 unverified.classList.remove('hide-completely')
-                outputUI("RIBC certificate", id, `Not verified`)
+                tryagain.classList.add('hide-completely')
             }
-        }).catch(error => console.error(error))
+        }).catch(error => {
+            console.log("Verification failed")
+            verified.classList.add('hide-completely')
+            unverified.classList.remove('hide-completely')
+            tryagain.classList.add('hide-completely')
+        })
     }
 
-    function outputUI(type, data, status, link) {
-        let t = document.createElement('h2')
-        t.textContent = type
-        let d = document.createElement('p')
-        d.textContent = data
-        let s = document.createElement('a')
-        s.textContent = status
+    function outputUI(head, body, foot, link) {
+        let h = document.createElement('h2')
+        h.textContent = head
+        let b = document.createElement('p')
+        b.textContent = body
+        let f = document.createElement('a')
+        f.textContent = foot
         if (link) {
-            s.setAttribute('href', link)
-            s.setAttribute('target', '_blank')
-            s.setAttribute('title', 'View in blockchain')
+            f.setAttribute('href', link)
+            f.setAttribute('target', '_blank')
+            f.setAttribute('title', 'View in blockchain')
         }
-        document.getElementById("result_box").append(t, d, s)
+        document.getElementById("result_box").append(h, b, f)
     }
 
     function getBlockchainLink(path) {
         let flosight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
         return flosight + path
+    }
+
+    function trimDate(d) {
+        d = new Date(d).toString()
+        return `${d.substring(4, 10)}, ${d.substring(11, 15)}`
     }
 </script>
 </body>
