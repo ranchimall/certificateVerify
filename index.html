@@ -14,9 +14,7 @@
 
         //Required for blockchain API operators
         apiURL: {
-            FLO: ['https://explorer.mediciland.com/', 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/',
-                'http://livenet-explorer.floexperiments.com/'
-            ],
+            FLO: [ 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/'],
             FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
         },
         //adminID: null,
@@ -45,8 +43,11 @@ body{
 body > * {
     grid-column: 2;
 }
-h2{
+#result_box h2{
     text-transform: capitalize;
+}
+#result_box h3{
+    text-align: center;
 }
 h4{
     font-weight: 500;
@@ -60,8 +61,9 @@ h4{
     text-align: center;
     margin-bottom: 2rem;
 }
-p{
+#result_box p{
     font-size: 1.1rem;
+    text-align: justify;
     line-height: 1.7;
     max-width: 70ch;
     opacity: 0.8;
@@ -7799,8 +7801,18 @@ Bitcoin.Util = {
             console.log(key, value)
             switch (key) {
                 case "internCertificate":
-                    internVerification(value);
+                    verifyCertificate(value, "RIBC certificate", "CERTIFICATE OF INTERNSHIP");
                     break;
+                case "employeeCertificate":
+                    verifyCertificate(value, "Employee certificate", "CERTIFICATE OF EMPLOYMENT");
+                    break;
+                case "volunteerCertificate":
+                    verifyCertificate(value, "Volunteer certificate", "CERTIFICATE OF VOLUNTEERSHIP");
+                    break;
+                case "participationCertificate":
+                    verifyCertificate(value, "Participation certificate", "CERTIFICATE OF PARTICIPATION");
+                    break;
+
             }
         }).catch(e => {
             console.error(e)
@@ -7812,12 +7824,13 @@ Bitcoin.Util = {
 
     const verified = document.getElementById('verified'),
         unverified = document.getElementById('unverified'),
-        tryagain = document.getElementById('try-again')
+        tryagain = document.getElementById('try-again');
 
-    function internVerification(id) {
+    function verifyCertificate(id, certType, verifierContent) {
         floBlockchainAPI.getTx(id).then(tx => {
             let iVerify = false,
-                oVerify = false;
+                oVerify = false,
+                cVerify = false;
             for (let i of tx.vin)
                 if (floGlobals.RMcertificateProvider === i.addr) {
                     iVerify = true;
@@ -7828,40 +7841,45 @@ Bitcoin.Util = {
                     oVerify = true;
                     break;
                 }
-            if (iVerify && oVerify) {
-                console.log("Internship Certificate Verified")
-                let link = getBlockchainLink(`tx/${id}`)
-                outputUI("RIBC certificate", tx.floData, `Issue Date: ${trimDate(tx.time*1000)}`, link)
+            cVerify = tx.floData.startsWith(verifierContent);
+            if (iVerify && oVerify && cVerify) {
+                console.log(`${certType} (${id}) verified`);
+                let link = getBlockchainLink(`tx/${id}`),
+                    content = tx.floData.substring(verifierContent.length).trim(),
+                    time = `Issue Date: ${trimDate(tx.time*1000)}`;
+                outputUI(certType, verifierContent, content, time, link);
                 verified.classList.remove('hide-completely')
                 unverified.classList.add('hide-completely')
                 tryagain.classList.add('hide-completely')
             } else {
-                console.log("Verification failed")
+                console.log(`${certType} (${id}) verification failed`);
                 verified.classList.add('hide-completely')
                 unverified.classList.remove('hide-completely')
                 tryagain.classList.add('hide-completely')
             }
         }).catch(error => {
-            console.log("Verification failed")
+            console.log(`${certType} (${id}) not verified`);
             verified.classList.add('hide-completely')
             unverified.classList.remove('hide-completely')
             tryagain.classList.add('hide-completely')
         })
     }
 
-    function outputUI(head, body, foot, link) {
-        let h = document.createElement('h2')
-        h.textContent = head
-        let b = document.createElement('p')
-        b.textContent = body
-        let f = document.createElement('a')
-        f.textContent = foot
+    function outputUI(head, type, body, foot, link) {
+        let h = document.createElement('h2');
+        h.textContent = head;
+        let t = document.createElement('h3');
+        t.textContent = type;
+        let b = document.createElement('p');
+        b.textContent = body;
+        let f = document.createElement('a');
+        f.textContent = foot;
         if (link) {
             f.setAttribute('href', link)
             f.setAttribute('target', '_blank')
             f.setAttribute('title', 'View in blockchain')
         }
-        document.getElementById("result_box").append(h, b, f)
+        document.getElementById("result_box").append(h, t, b, f);
     }
 
     function getBlockchainLink(path) {
