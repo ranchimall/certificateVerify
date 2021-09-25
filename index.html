@@ -1,263 +1,328 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Ranchimall Certificate Verifier</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<script id="floGlobals">
-    /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
-    const floGlobals = {
+    <title>Ranchimall Certificate Verifier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script id="floGlobals">
+        /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
+        const floGlobals = {
 
-        //Required for all
-        blockchain: "FLO",
+            //Required for all
+            blockchain: "FLO",
 
-        //Required for blockchain API operators
-        apiURL: {
-            FLO: [ 'https://livenet.flocha.in/', 'https://flosight.duckdns.org/'],
-            FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
-        },
-        //adminID: null,
-        RMincorporationID: "FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk",
-        RMcertificateProvider: "FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE",
-        //sendAmt: 0.001,
-        //fee: 0.0005,
-    }
-</script>
-<style>
-* {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-}
-:root{
-    font-size: clamp(16px, 1.2vmax, 40px);
-}
-body{
-    display: grid;
-    gap: 2em 0; 
-    grid-template-columns: 2rem 1fr 2rem;
-    padding-bottom: 4rem;
-}
-body > * {
-    grid-column: 2;
-}
-#result_box h2{
-    text-transform: capitalize;
-}
-#result_box h3{
-    text-align: center;
-}
-h4{
-    font-weight: 500;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    background: rgba(0,0,0,0.06);
-    border-radius: 2rem;
-    padding: 0.6rem 1.6rem;
-    width: auto;
-    align-self: center;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-#result_box p{
-    font-size: 1.1rem;
-    text-align: center;
-    line-height: 1.7;
-    max-width: 70ch;
-    opacity: 0.8;
-}
-.hide-completely{
-    display: none !important;
-}
-.icon {
-    height: 4rem;
-    width: 4rem;
-    fill: none;
-    stroke-width: 4;
-    overflow: visible;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    margin-bottom: 1rem;
-    align-self: center;
-}
-header{
-    border-bottom: solid 0.1rem rgba(0,0,0,0.2);
-    grid-column: 1/4;
-    padding: 1.5rem 2rem;
-}
-header h3{
-    font-weight: 500;
-}
-#result_box{
-    display: grid;
-    gap: 1em;
-}
-#verified{
-    display: flex;
-    flex-direction: column;
-}
-#verified .icon{
-    stroke: rgb(18, 192, 70);
-}
-#unverified .icon{
-    stroke: rgb(255, 48, 48);
-}
-#try-again .icon{
-    stroke: rgb(255, 115, 0);
-}
-@media screen and (min-width: 640px){
-    body{
-        grid-template-columns: 1fr 60vw 1fr;
-    }
-    header{
-        padding: 1.5rem 3rem;
-    }
-}
-</style>
+            //Required for blockchain API operators
+            apiURL: {
+                FLO: ['https://livenet.flocha.in/', 'https://flosight.duckdns.org/'],
+                FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
+            },
+            //adminID: null,
+            RMincorporationID: "FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk",
+            RMcertificateProvider: "FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE",
+            //sendAmt: 0.001,
+            //fee: 0.0005,
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        :root {
+            font-size: clamp(16px, 1.2vmax, 40px);
+        }
+
+        html,
+        body {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            display: grid;
+            grid-template-columns: 2rem 1fr 2rem;
+        }
+
+        body>* {
+            grid-column: 2;
+        }
+
+        #main {
+            display: grid;
+            gap: 1.5rem;
+            align-content: flex-start;
+        }
+
+        h4 {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .hide-completely {
+            display: none !important;
+        }
+
+        .icon {
+            height: 4rem;
+            width: 4rem;
+            margin-bottom: 1rem;
+            align-self: center;
+            background-color: rgba(0, 0, 0, 0.06);
+            border-radius: 50%;
+            padding: 1rem;
+        }
+
+        header h3 {
+            font-weight: 500;
+        }
+
+        #verification_status {
+            align-content: center;
+            display: grid;
+            text-align: center;
+            justify-items: center;
+            padding: 1.5rem 0;
+        }
+
+        #verification_status p {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .verified .icon {
+            fill: #1cad59;
+        }
+
+        .unverified .icon {
+            fill: rgb(255, 75, 75);
+        }
+
+        .error .icon {
+            fill: rgb(146, 146, 146);
+        }
+
+        #result_box {
+            display: grid;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        #result_box time {
+            font-size: 0.9rem;
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        #result_box p {
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 70ch;
+            opacity: 0.8;
+            margin-top: 1rem;
+            overflow-wrap: break-word;
+        }
+
+        #result_box h2 {
+            text-transform: capitalize;
+        }
+
+        .transaction-link {
+            align-self: flex-start;
+            text-decoration: none;
+            background-color: rgba(0, 0, 0, 0.06);
+            padding: 0.5rem 0.8rem;
+            font-size: 0.9rem;
+            border-radius: 0.3rem;
+            color: rgba(0, 0, 0, 0.7);
+            margin-top: 1.5rem;
+        }
+
+        @media screen and (max-width: 640px) {
+            #verification_status {
+                margin-top: 1.5rem;
+            }
+        }
+
+        @media screen and (min-width: 640px) {
+            body {
+                grid-template-columns: 1fr 90vw 1fr;
+                place-content: center;
+            }
+
+            #main {
+                align-self: center;
+                grid-template-columns: 18rem 1fr;
+                justify-content: center;
+                border-radius: 0.5rem;
+                border: solid 0.2rem dodgerblue;
+                padding: 5rem 3rem;
+            }
+
+            #verification_status {
+                padding-right: 1.5rem;
+                border-right: thin solid rgba(0, 0, 0, 0.2);
+            }
+
+            #result_box {
+                grid-template-columns: 1fr auto;
+                padding-left: 1.5rem;
+            }
+
+            #result_box p {
+                grid-column: span 2;
+                align-self: flex-start;
+            }
+        }
+
+        @media screen and (min-width: 1080px) {
+            body {
+                grid-template-columns: 1fr 80vw 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body onload="onLoadStartUp()">
-    <header>
-        <h3>Ranchimall Certificate Verifier</h3>
-    </header>
-    <div id="verified" class="hide-completely">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 64 64">
-            <title>success</title>
-            <ellipse cx="32" cy="32" rx="31.5" ry="31.49"/>
-            <polyline points="17.04 30.48 27.92 41.36 46.96 22.32"/>
-        </svg>
-        <h4>
-            Verified, This is a genuine certificate issued by RanchiMall.
-        </h4>
+    <div id="main">
+        <div id="verification_status"></div>
+        <div id="result_box"></div>
     </div>
-    <div id="unverified" class="hide-completely">
-        <svg viewBox="0 0 64 64" class="icon">
-        <title>failed</title>
-            <path d="M32,4.73a3.17,3.17,0,0,1,2.76,1.59l13.9,24.09L62.57,54.49a3.19,3.19,0,0,1-2.76,4.78H4.19a3.19,3.19,0,0,1-2.76-4.78L15.34,30.41,29.24,6.32A3.17,3.17,0,0,1,32,4.73m0-1a4.14,4.14,0,0,0-3.62,2.09L14.47,29.91.57,54a4.19,4.19,0,0,0,3.62,6.28H59.81A4.19,4.19,0,0,0,63.43,54L49.53,29.91,35.62,5.82A4.14,4.14,0,0,0,32,3.73Z"/>
-            <line x1="32" y1="24" x2="32" y2="36"/>
-            <line x1="32" y1="46" x2="32" y2="48"/>
-        </svg>
-        <h4>
-            Verification failed!
-        </h4>
-    </div>
-    <div id="try-again" class="hide-completely">
-        <svg viewBox="0 0 64 64" class="icon">
-        <title>error</title>
-            <path d="M32,4.73a3.17,3.17,0,0,1,2.76,1.59l13.9,24.09L62.57,54.49a3.19,3.19,0,0,1-2.76,4.78H4.19a3.19,3.19,0,0,1-2.76-4.78L15.34,30.41,29.24,6.32A3.17,3.17,0,0,1,32,4.73m0-1a4.14,4.14,0,0,0-3.62,2.09L14.47,29.91.57,54a4.19,4.19,0,0,0,3.62,6.28H59.81A4.19,4.19,0,0,0,63.43,54L49.53,29.91,35.62,5.82A4.14,4.14,0,0,0,32,3.73Z"/>
-            <line x1="32" y1="24" x2="32" y2="36"/>
-            <line x1="32" y1="46" x2="32" y2="48"/>
-        </svg>
-        <h4>
-            Try Again Later!
-        </h4>
-    </div>
-    <div id="result_box"></div>
 
-<script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floCrypto.js"></script>
-<script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floBlockchainAPI.js"></script>
-<script id="onLoadStartUp">
-    function onLoadStartUp() {
-        console.log("Ranchimall Certificate Verifier")
-        floBlockchainAPI.getBalance(floCrypto.generateNewID().floID).then(r => {
-            let req = window.location.search.substring(1).split('=')
-            let key = req[0],
-                value = req[1]
-            console.log(key, value)
-            switch (key) {
-                case "internCertificate":
-                    verifyCertificate(value, "RIBC certificate", "CERTIFICATE OF INTERNSHIP");
-                    break;
-                case "employeeCertificate":
-                    verifyCertificate(value, "Employee certificate", "CERTIFICATE OF EMPLOYMENT");
-                    break;
-                case "volunteerCertificate":
-                    verifyCertificate(value, "Volunteer certificate", "CERTIFICATE OF VOLUNTEERSHIP");
-                    break;
-                case "participationCertificate":
-                    verifyCertificate(value, "Participation certificate", "CERTIFICATE OF PARTICIPATION");
-                    break;
+    <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floCrypto.js"></script>
+    <script
+        src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floBlockchainAPI.js"></script>
+    <script id="onLoadStartUp">
+        function onLoadStartUp() {
+            console.log("Ranchimall Certificate Verifier")
+            floBlockchainAPI.getBalance(floCrypto.generateNewID().floID).then(r => {
+                let req = window.location.search.substring(1).split('=')
+                let key = req[0],
+                    value = req[1]
+                console.log(key, value)
+                switch (key) {
+                    case "internCertificate":
+                        verifyCertificate(value, "RIBC certificate", "CERTIFICATE OF INTERNSHIP");
+                        break;
+                    case "employeeCertificate":
+                        verifyCertificate(value, "Employee certificate", "CERTIFICATE OF EMPLOYMENT");
+                        break;
+                    case "volunteerCertificate":
+                        verifyCertificate(value, "Volunteer certificate", "CERTIFICATE OF VOLUNTEERSHIP");
+                        break;
+                    case "participationCertificate":
+                        verifyCertificate(value, "Participation certificate", "CERTIFICATE OF PARTICIPATION");
+                        break;
 
-            }
-        }).catch(e => {
-            console.error(e)
-            verified.classList.add('hide-completely')
-            unverified.classList.add('hide-completely')
-            tryagain.classList.remove('hide-completely')
-        })
-    }
-
-    const verified = document.getElementById('verified'),
-        unverified = document.getElementById('unverified'),
-        tryagain = document.getElementById('try-again');
-
-    function verifyCertificate(id, certType, verifierContent) {
-        floBlockchainAPI.getTx(id).then(tx => {
-            let iVerify = false,
-                oVerify = false,
-                cVerify = false;
-            for (let i of tx.vin)
-                if (floGlobals.RMcertificateProvider === i.addr) {
-                    iVerify = true;
-                    break;
                 }
-            for (let o of tx.vout)
-                if (floGlobals.RMincorporationID === o.scriptPubKey.addresses[0]) {
-                    oVerify = true;
-                    break;
-                }
-            cVerify = tx.floData.startsWith(verifierContent);
-            if (iVerify && oVerify && cVerify) {
-                console.log(`${certType} (${id}) verified`);
-                let link = getBlockchainLink(`tx/${id}`),
-                    content = tx.floData.substring(verifierContent.length).trim(),
-                    time = `Issue Date: ${trimDate(tx.time*1000)}`;
-                outputUI(certType, verifierContent, content, time, link);
-                verified.classList.remove('hide-completely')
-                unverified.classList.add('hide-completely')
-                tryagain.classList.add('hide-completely')
-            } else {
-                console.log(`${certType} (${id}) verification failed`);
-                verified.classList.add('hide-completely')
-                unverified.classList.remove('hide-completely')
-                tryagain.classList.add('hide-completely')
-            }
-        }).catch(error => {
-            console.log(`${certType} (${id}) not verified`);
-            verified.classList.add('hide-completely')
-            unverified.classList.remove('hide-completely')
-            tryagain.classList.add('hide-completely')
-        })
-    }
-
-    function outputUI(head, type, body, foot, link) {
-        let h = document.createElement('h2');
-        h.textContent = head;
-        let t = document.createElement('h3');
-        t.textContent = type;
-        let b = document.createElement('p');
-        b.textContent = body;
-        let f = document.createElement('a');
-        f.textContent = foot;
-        if (link) {
-            f.setAttribute('href', link)
-            f.setAttribute('target', '_blank')
-            f.setAttribute('title', 'View in blockchain')
+            }).catch(e => {
+                console.error(e)
+                showVerificationStatus('error')
+            })
         }
-        document.getElementById("result_box").append(h, t, b, f);
-    }
 
-    function getBlockchainLink(path) {
-        let flosight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
-        return flosight + path
-    }
+        const verificationStatus = document.getElementById('verification_status')
+        function showVerificationStatus(status, link) {
+            let statusComposition = ''
+            verificationStatus.className = status
+            switch (status) {
+                case 'verified':
+                    statusComposition = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                        <h4>
+                            Verified
+                        </h4>
+                        <p>
+                            This is a genuine certificate issued by RanchiMall
+                        </p>
+                        <a href="${link}" target="_blank" class="transaction-link">View on blockchain</a>
+                    `
+                    break;
+                case 'unverified':
+                    statusComposition = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <h4>
+                            Verification failed!
+                        </h4>
+                    `
+                    break;
+                case 'error':
+                    statusComposition = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path
+                                    d="M3.707 2.293a1 1 0 00-1.414 1.414l6.921 6.922c.05.062.105.118.168.167l6.91 6.911a1 1 0 001.415-1.414l-.675-.675a9.001 9.001 0 00-.668-11.982A1 1 0 1014.95 5.05a7.002 7.002 0 01.657 9.143l-1.435-1.435a5.002 5.002 0 00-.636-6.294A1 1 0 0012.12 7.88c.924.923 1.12 2.3.587 3.415l-1.992-1.992a.922.922 0 00-.018-.018l-6.99-6.991zM3.238 8.187a1 1 0 00-1.933-.516c-.8 3-.025 6.336 2.331 8.693a1 1 0 001.414-1.415 6.997 6.997 0 01-1.812-6.762zM7.4 11.5a1 1 0 10-1.73 1c.214.371.48.72.795 1.035a1 1 0 001.414-1.414c-.191-.191-.35-.4-.478-.622z" />
+                            </svg>
+                            <h4>
+                                Try Again Later!
+                            </h4>
+                        `
+                    break
+            }
+            verificationStatus.innerHTML = statusComposition
+        }
 
-    function trimDate(d) {
-        d = new Date(d).toString()
-        return `${d.substring(4, 10)}, ${d.substring(11, 15)}`
-    }
-</script>
+        function verifyCertificate(id, certType, verifierContent) {
+            floBlockchainAPI.getTx(id).then(tx => {
+                let iVerify = false,
+                    oVerify = false,
+                    cVerify = false;
+                for (let i of tx.vin)
+                    if (floGlobals.RMcertificateProvider === i.addr) {
+                        iVerify = true;
+                        break;
+                    }
+                for (let o of tx.vout)
+                    if (floGlobals.RMincorporationID === o.scriptPubKey.addresses[0]) {
+                        oVerify = true;
+                        break;
+                    }
+                cVerify = tx.floData.startsWith(verifierContent);
+                if (iVerify && oVerify && cVerify) {
+                    console.log(`${certType} (${id}) verified`);
+                    let link = getBlockchainLink(`tx/${id}`),
+                        content = tx.floData.substring(verifierContent.length).trim(),
+                        time = `Issued: ${trimDate(tx.time * 1000)}`;
+                    outputUI(certType, verifierContent, content, time);
+                    showVerificationStatus('verified', link)
+                } else {
+                    console.log(`${certType} (${id}) verification failed`);
+                    showVerificationStatus('unverified')
+                }
+            }).catch(error => {
+                console.log(`${certType} (${id}) not verified`);
+                showVerificationStatus('error')
+            })
+        }
+
+        function outputUI(head, type, body, foot, link) {
+            let t = document.createElement('h3');
+            t.textContent = type;
+            let b = document.createElement('p');
+            b.innerHTML = body.replace(/([a-zA-Z0-9]){30,36}/, `<i>$&</i>`);
+            let f = document.createElement('time');
+            f.textContent = foot;
+            document.getElementById("result_box").append(t, f, b);
+        }
+
+        function getBlockchainLink(path) {
+            let flosight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
+            return flosight + path
+        }
+
+        function trimDate(d) {
+            d = new Date(d).toString()
+            return `${d.substring(4, 10)}, ${d.substring(11, 15)}`
+        }
+    </script>
 </body>
+
 </html>
