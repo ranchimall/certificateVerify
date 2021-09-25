@@ -153,7 +153,7 @@
                 place-content: center;
             }
 
-            #main {
+            #main.success {
                 align-self: center;
                 grid-template-columns: 18rem 1fr;
                 justify-content: center;
@@ -162,17 +162,17 @@
                 padding: 5rem 3rem;
             }
 
-            #verification_status {
+            #main.success #verification_status {
                 padding-right: 1.5rem;
                 border-right: thin solid rgba(0, 0, 0, 0.2);
             }
 
-            #result_box {
+            #main.success #result_box {
                 grid-template-columns: 1fr auto;
                 padding-left: 1.5rem;
             }
 
-            #result_box p {
+            #main.success #result_box p {
                 grid-column: span 2;
                 align-self: flex-start;
             }
@@ -242,6 +242,7 @@
                         </p>
                         <a href="${link}" target="_blank" class="transaction-link">View on blockchain</a>
                     `
+                    document.getElementById('main').className = 'success'
                     break;
                 case 'unverified':
                     statusComposition = `
@@ -304,6 +305,7 @@
         }
 
         function outputUI(head, type, body, foot, link) {
+            console.log(head)
             let t = document.createElement('h3');
             t.textContent = type;
             let b = document.createElement('p');
