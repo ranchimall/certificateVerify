@@ -231,8 +231,8 @@
                     <sm-spinner></sm-spinner>
                 </div>
                 <p>
-                    Checking whether certificate issued by <strong>Authorized Blockchain Issuer ID
-                        FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE</strong>
+                    Checking whether certificate <strong>issued by Authorized Blockchain Issuer ID</strong>
+                    FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE
                 </p>
             </div>
             <div class="step">
@@ -240,9 +240,8 @@
                     <sm-spinner></sm-spinner>
                 </div>
                 <p>
-                    Checking whether certificate was <strong>correctly sent to approved Blockchain ID
-                        FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk</strong>, or
-                    <strong>FDaX363r1ooANA9A2erhehhigNTnidq3o4</strong>
+                    Checking whether certificate was <strong>correctly sent to approved Blockchain ID</strong>
+                    FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk, or FDaX363r1ooANA9A2erhehhigNTnidq3o4
                 </p>
             </div>
             <div class="step">
@@ -250,7 +249,7 @@
                     <sm-spinner></sm-spinner>
                 </div>
                 <p>
-                    Checking whether blockchain data <strong>starts with</strong> CERTIFICATE OF INTERNSHIP, and
+                    Checking whether <strong>blockchain data starts with CERTIFICATE OF INTERNSHIP</strong>, and
                     verification link has
                     those words
                 </p>
@@ -278,6 +277,7 @@
             floBlockchainAPI.getBalance(floCrypto.generateNewID().floID).then(r => {
                 const [key, value] = window.location.search.substring(1).split('=')
                 console.log(key, value)
+                if (key === '' && !value) throw new Error("No verification ID found")
                 switch (key) {
                     case "internCertificate":
                         verifyCertificate(value, "RIBC certificate", "CERTIFICATE OF INTERNSHIP");
@@ -295,7 +295,7 @@
                 }
             }).catch(e => {
                 console.error(e)
-                showVerificationStatus('error')
+                showVerificationStatus('error', e.message)
             })
         }
 
