@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>Ranchimall Certificate Verifier</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
+        rel="stylesheet">
     <script id="floGlobals">
         /* Constants for FLO blockchain operations !!Make sure to add this at begining!! */
         const floGlobals = {
@@ -46,17 +49,15 @@
 
         body {
             display: grid;
-            grid-template-columns: 2rem 1fr 2rem;
-        }
-
-        body>* {
-            grid-column: 2;
+            place-items: center;
         }
 
         #main {
             display: grid;
             gap: 1.5rem;
             align-content: flex-start;
+            align-self: center;
+            padding: 1.5rem;
         }
 
         h4 {
@@ -65,11 +66,31 @@
             margin-bottom: 0.5rem;
         }
 
-        .hide-completely {
+        p {
+            max-width: 70ch;
+            color: rgba(0, 0, 0, 0.9);
+        }
+
+        p,
+        strong,
+        .wrap-around {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .hidden {
             display: none !important;
         }
 
         .icon {
+            height: 1.2rem;
+            width: 1.2rem;
+            fill: rgba(0, 0, 0, 0.9);
+        }
+
+        .icon--big {
             height: 4rem;
             width: 4rem;
             margin-bottom: 1rem;
@@ -77,6 +98,34 @@
             background-color: rgba(0, 0, 0, 0.06);
             border-radius: 50%;
             padding: 1rem;
+        }
+
+        #loading_page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100dvh;
+            padding: 1.5rem;
+        }
+
+        #verification_steps {
+            display: grid;
+            gap: 1rem;
+            align-items: center;
+            justify-items: center;
+            margin-top: 5rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        sm-spinner {
+            --size: 1.2rem;
+            --accent-color: grey;
         }
 
         header h3 {
@@ -99,12 +148,8 @@
             fill: #1cad59;
         }
 
-        .unverified .icon {
-            fill: rgb(255, 75, 75);
-        }
-
         .error .icon {
-            fill: rgb(146, 146, 146);
+            fill: rgb(255, 75, 75);
         }
 
         #result_box {
@@ -124,7 +169,6 @@
             max-width: 70ch;
             opacity: 0.8;
             margin-top: 1rem;
-            overflow-wrap: break-word;
         }
 
         #result_box h3 {
@@ -149,11 +193,6 @@
         }
 
         @media screen and (min-width: 640px) {
-            body {
-                grid-template-columns: 1fr 90vw 1fr;
-                place-content: center;
-            }
-
             #main.success {
                 align-self: center;
                 grid-template-columns: 18rem 1fr;
@@ -178,31 +217,66 @@
                 align-self: flex-start;
             }
         }
-
-        @media screen and (min-width: 1080px) {
-            body {
-                grid-template-columns: 1fr 80vw 1fr;
-            }
-        }
     </style>
 </head>
 
 <body onload="onLoadStartUp()">
-    <div id="main">
-        <div id="verification_status"></div>
-        <div id="result_box"></div>
+    <div id="loading_page">
+        <div id="loading_page_content">
+            <h4>Verifying Certificate</h4>
+            <p>Please wait while we verify your certificate</p>
+        </div>
+        <div id="verification_steps">
+            <div class="step">
+                <div class="step-icon">
+                    <sm-spinner></sm-spinner>
+                </div>
+                <p>
+                    Checking whether certificate issued by Authorized Blockchain Issuer ID
+                    <strong>FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE</strong>
+                </p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <sm-spinner></sm-spinner>
+                </div>
+                <p>
+                    Checking whether certificate was correctly sent to approved Blockchain ID
+                    <strong>FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk</strong>, or
+                    <strong>FDaX363r1ooANA9A2erhehhigNTnidq3o4</strong>
+                </p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <sm-spinner></sm-spinner>
+                </div>
+                <p>
+                    Checking whether blockchain data starts with CERTIFICATE OF INTERNSHIP, and verification link has
+                    those words
+                </p>
+            </div>
+        </div>
     </div>
-
-    <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floCrypto.js"></script>
-    <script
-        src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floBlockchainAPI.js"></script>
+    <div id="main" class="hidden">
+        <div id="verification_status"></div>
+        <div id="result_box">
+            <h3 id="cert_type"></h3>
+            <time id="issue_time"></time>
+            <p id="cert_text"></p>
+        </div>
+    </div>
+    <script>
+        const spinner = document.createElement("template"); spinner.innerHTML = '<style>*{padding: 0;margin: 0;-webkit-box-sizing: border-box;box-sizing: border-box;}.loader {display: flex;height: var(--size, 1.5rem);width: var(--size, 1.5rem);stroke-width: 8;overflow: visible;stroke: var(--accent-color, teal);fill: none;stroke-dashoffset: 180;stroke-dasharray: 180;animation: load 2s infinite, spin 1s linear infinite;}@keyframes load {50% {stroke-dashoffset: 0;}100%{stroke-dashoffset: -180;}}@keyframes spin {100% {transform: rotate(360deg);}}</style><svg viewBox="0 0 64 64" class="loader"><circle cx="32" cy="32" r="32" /></svg>'; class SpinnerLoader extends HTMLElement { constructor() { super(), this.attachShadow({ mode: "open" }).append(spinner.content.cloneNode(!0)) } } window.customElements.define("sm-spinner", SpinnerLoader);
+    </script>
+    <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floCrypto.js"
+        defer></script>
+    <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floBlockchainAPI.js"
+        defer></script>
     <script id="onLoadStartUp">
         function onLoadStartUp() {
             console.log("Ranchimall Certificate Verifier")
             floBlockchainAPI.getBalance(floCrypto.generateNewID().floID).then(r => {
-                let req = window.location.search.substring(1).split('=')
-                let key = req[0],
-                    value = req[1]
+                const [key, value] = window.location.search.substring(1).split('=')
                 console.log(key, value)
                 switch (key) {
                     case "internCertificate":
@@ -232,93 +306,88 @@
             switch (status) {
                 case 'verified':
                     statusComposition = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                        <h4>
-                            Verified
-                        </h4>
-                        <p>
-                            This is a genuine certificate issued by RanchiMall
-                        </p>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon--big" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /> </svg>
+                        <h4> Verified </h4>
+                        <p> This is a genuine certificate issued by RanchiMall </p>
                         <a href="${link}" target="_blank" class="transaction-link">View on blockchain</a>
-                    `
+                        `
                     document.getElementById('main').className = 'success'
-                    break;
-                case 'unverified':
-                    statusComposition = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <h4>
-                            Verification failed!
-                        </h4>
-                    `
                     break;
                 case 'error':
                     statusComposition = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
-                                <path
-                                    d="M3.707 2.293a1 1 0 00-1.414 1.414l6.921 6.922c.05.062.105.118.168.167l6.91 6.911a1 1 0 001.415-1.414l-.675-.675a9.001 9.001 0 00-.668-11.982A1 1 0 1014.95 5.05a7.002 7.002 0 01.657 9.143l-1.435-1.435a5.002 5.002 0 00-.636-6.294A1 1 0 0012.12 7.88c.924.923 1.12 2.3.587 3.415l-1.992-1.992a.922.922 0 00-.018-.018l-6.99-6.991zM3.238 8.187a1 1 0 00-1.933-.516c-.8 3-.025 6.336 2.331 8.693a1 1 0 001.414-1.415 6.997 6.997 0 01-1.812-6.762zM7.4 11.5a1 1 0 10-1.73 1c.214.371.48.72.795 1.035a1 1 0 001.414-1.414c-.191-.191-.35-.4-.478-.622z" />
-                            </svg>
-                            <h4>
-                                Try Again Later!
-                            </h4>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon--big" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /> </svg>
+                        <h4> Verification failed </h4>
+                        <p>${link} </p>
                         `
                     break
             }
             verificationStatus.innerHTML = statusComposition
+            document.getElementById('loading_page').classList.add('hidden')
+            document.getElementById('main').classList.remove('hidden')
+        }
+
+        function wait(ms = 500) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        function processStatus(iVerify, oVerify, cVerify) {
+            return new Promise(async (resolve, reject) => {
+                const steps = document.querySelectorAll('.step')
+                await showProcessStatus(steps[0], iVerify)
+                if (!iVerify)
+                    reject()
+                await showProcessStatus(steps[1], oVerify)
+                if (!oVerify)
+                    reject()
+                await showProcessStatus(steps[2], cVerify)
+                if (!cVerify)
+                    reject()
+                resolve()
+            })
+        }
+        async function showProcessStatus(elem, status) {
+            const check = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>`
+            const error = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`
+            if (status) {
+                elem.classList.add('verified')
+                elem.firstElementChild.innerHTML = check
+            } else {
+                elem.classList.add('error')
+                elem.firstElementChild.innerHTML = error
+            }
+            await wait()
         }
 
         function verifyCertificate(id, certType, verifierContent) {
-            floBlockchainAPI.getTx(id).then(tx => {
-                let iVerify = false,
-                    oVerify = false,
-                    cVerify = false;
-                for (let i of tx.vin)
-                    if (floGlobals.RM_CertificateIssuer_id === i.addr) {
-                        iVerify = true;
-                        break;
-                    }
-                for (let o of tx.vout)
-                    if ((floGlobals.RMincorporationID === o.scriptPubKey.addresses[0]) || (floGlobals.RIBC_id === o.scriptPubKey.addresses[0])) {
-                        oVerify = true;
-                        break;
-                    }
-                cVerify = tx.floData.startsWith(verifierContent);
-                if (iVerify && oVerify && cVerify) {
+            floBlockchainAPI.getTx(id).then(async tx => {
+                const { vin, vout, time, floData } = tx
+                const iVerify = vin.some(i => i.addr === floGlobals.RM_CertificateIssuer_id);
+                const oVerify = vout.some(o => [floGlobals.RMincorporationID, floGlobals.RIBC_id].includes(o.scriptPubKey.addresses[0]));
+                const cVerify = floData.startsWith(verifierContent);
+                processStatus(iVerify, oVerify, cVerify).then(() => {
                     console.log(`${certType} (${id}) verified`);
-                    let link = getBlockchainLink(`tx/${id}`),
-                        content = tx.floData.substring(verifierContent.length).trim(),
-                        time = `Issued: ${trimDate(tx.time * 1000)}`;
-                    outputUI(certType, verifierContent, content, time);
+                    outputUI(verifierContent, time, floData);
+                    let link = getBlockchainLink(`tx/${id}`)
                     showVerificationStatus('verified', link)
-                } else {
-                    console.log(`${certType} (${id}) verification failed`);
-                    showVerificationStatus('unverified')
-                }
+                }).catch(() => {
+                    showVerificationStatus('error')
+                })
             }).catch(error => {
-                console.log(`${certType} (${id}) not verified`);
-                showVerificationStatus('error')
+                console.error(`${certType} (${id}) not verified`);
+                showVerificationStatus('error', `Incorrect Certificate ID\n${id}`)
             })
         }
 
-        function outputUI(head, type, body, foot, link) {
-            console.log(head)
-            let t = document.createElement('h3');
-            t.textContent = type;
-            let b = document.createElement('p');
-            b.innerHTML = body.replace(/([a-zA-Z0-9]){30,36}/, `<i>$&</i>`);
-            let f = document.createElement('time');
-            f.textContent = foot;
-            document.getElementById("result_box").append(t, f, b);
+        function outputUI(verifierContent, time, floData) {
+            const content = floData.substring(verifierContent.length).trim();
+            const issueTime = `Issued: ${trimDate(time * 1000)}`;
+            document.getElementById('cert_type').textContent = verifierContent
+            document.getElementById('cert_text').innerHTML = content.replace(/([a-zA-Z0-9]){30,36}/, `<strong>$&</strong>`);
+            document.getElementById('issue_time').textContent = issueTime
         }
 
         function getBlockchainLink(path) {
-            let flosight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
-            return flosight + path
+            let floSight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
+            return floSight + path
         }
 
         function trimDate(d) {
