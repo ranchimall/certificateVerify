@@ -15,12 +15,13 @@
 
             //Required for blockchain API operators
             apiURL: {
-                FLO: ['https://livenet.flocha.in/', 'https://flosight.duckdns.org/'],
+                FLO: ['https://flosight.duckdns.org/'],
                 FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
             },
             //adminID: null,
             RMincorporationID: "FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk",
-            RMcertificateProvider: "FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE",
+            RIBC_id: "FDaX363r1ooANA9A2erhehhigNTnidq3o4",
+            RM_CertificateIssuer_id: "FFCpiaZi31TpbYw5q5VNk8qJMeDiTLgsrE",
             //sendAmt: 0.001,
             //fee: 0.0005,
         }
@@ -277,12 +278,12 @@
                     oVerify = false,
                     cVerify = false;
                 for (let i of tx.vin)
-                    if (floGlobals.RMcertificateProvider === i.addr) {
+                    if (floGlobals.RM_CertificateIssuer_id === i.addr) {
                         iVerify = true;
                         break;
                     }
                 for (let o of tx.vout)
-                    if (floGlobals.RMincorporationID === o.scriptPubKey.addresses[0]) {
+                    if ((floGlobals.RMincorporationID === o.scriptPubKey.addresses[0]) || (floGlobals.RIBC_id === o.scriptPubKey.addresses[0])) {
                         oVerify = true;
                         break;
                     }
