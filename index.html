@@ -445,8 +445,12 @@
             const content = floData.substring(verifierContent.length).trim();
             const issueTime = `Issued: ${trimDate(time * 1000)}`;
             document.getElementById('cert_type').textContent = verifierContent
-            document.getElementById('cert_text').innerHTML = content.replace(/([a-zA-Z0-9]){30,36}/, `<strong>$&</strong>`);
             document.getElementById('issue_time').textContent = issueTime
+            if (floData.includes('|')) {
+                [certType, floId, name, certPara] = floData.split('|')
+                document.getElementById('cert_text').innerHTML = `<strong>${name}</strong>, FLO ID: <b>${floId}</b> ${certPara}`;
+            } else
+                document.getElementById('cert_text').innerHTML = content.replace(/([a-zA-Z0-9]){30,36}/, `<strong>$&</strong>`);
         }
 
         function getBlockchainLink(path) {
