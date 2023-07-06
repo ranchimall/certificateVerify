@@ -16,11 +16,6 @@
             //Required for all
             blockchain: "FLO",
 
-            //Required for blockchain API operators
-            apiURL: {
-                FLO: ['https://flosight.duckdns.org/'],
-                FLO_TEST: ['https://testnet-flosight.duckdns.org/', 'https://testnet.flocha.in/']
-            },
             //adminID: null,
             RMincorporationID: "FKNW5eCCp2SnJMJ6pLLpUCvk5hAage8Jtk",
             RIBC_id: "FDaX363r1ooANA9A2erhehhigNTnidq3o4",
@@ -305,6 +300,7 @@
     <script>
         const spinner = document.createElement("template"); spinner.innerHTML = '<style>*{padding: 0;margin: 0;-webkit-box-sizing: border-box;box-sizing: border-box;}.loader {display: flex;height: var(--size, 1.5rem);width: var(--size, 1.5rem);stroke-width: 8;overflow: visible;stroke: var(--accent-color, teal);fill: none;stroke-dashoffset: 180;stroke-dasharray: 180;animation: load 2s infinite, spin 1s linear infinite;}@keyframes load {50% {stroke-dashoffset: 0;}100%{stroke-dashoffset: -180;}}@keyframes spin {100% {transform: rotate(360deg);}}</style><svg viewBox="0 0 64 64" class="loader"><circle cx="32" cy="32" r="32" /></svg>'; class SpinnerLoader extends HTMLElement { constructor() { super(), this.attachShadow({ mode: "open" }).append(spinner.content.cloneNode(!0)) } } window.customElements.define("sm-spinner", SpinnerLoader);
     </script>
+    <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/lib.js" defer></script>
     <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floCrypto.js"
         defer></script>
     <script src="https://github.com/ranchimall/Standard_Operations/releases/latest/download/floBlockchainAPI.js"
@@ -398,14 +394,14 @@
                 const steps = document.querySelectorAll('.step')
                 await showProcessStatus(steps[0], iVerify)
                 if (!iVerify)
-                    reject()
+                    reject("Certificate not issued by authority")
                 await showProcessStatus(steps[1], oVerify)
                 if (!oVerify)
-                    reject()
+                    reject("Certificate not authorised")
                 await showProcessStatus(steps[2], cVerify)
                 if (!cVerify)
-                    reject()
-                resolve()
+                    reject("Certificate Invalid")
+                resolve(true)
             })
         }
         async function showProcessStatus(elem, status) {
@@ -424,7 +420,7 @@
         function verifyCertificate(id, certType, verifierContent) {
             floBlockchainAPI.getTx(id).then(async tx => {
                 const { vin, vout, time, floData } = tx
-                const iVerify = vin.some(i => i.addr === floGlobals.RM_CertificateIssuer_id);
+                const iVerify = vin.some(i => i.addresses[0] === floGlobals.RM_CertificateIssuer_id);
                 const oVerify = vout.some(o => [floGlobals.RMincorporationID, floGlobals.RIBC_id].includes(o.scriptPubKey.addresses[0]));
                 const cVerify = floData.startsWith(verifierContent);
                 processStatus(iVerify, oVerify, cVerify).then(() => {
@@ -432,8 +428,8 @@
                     outputUI(verifierContent, time, floData);
                     let link = getBlockchainLink(`tx/${id}`)
                     showVerificationStatus('verified', link)
-                }).catch(() => {
-                    showVerificationStatus('error')
+                }).catch((reason) => {
+                    showVerificationStatus('error', reason)
                 })
             }).catch(error => {
                 console.error(`${certType} (${id}) not verified`);
@@ -454,7 +450,7 @@
         }
 
         function getBlockchainLink(path) {
-            let floSight = floBlockchainAPI.util.serverList[floBlockchainAPI.util.curPos]
+            let floSight = floBlockchainAPI.current_server;
             return floSight + path
         }
 
